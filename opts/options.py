@@ -8,23 +8,23 @@ def arguments() -> str:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--cover_path",
-        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/train"
-        # default="~/data/GBRASNET/BOSSbase-1.01-div/cover/train"
+        # default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/train"
+        default="~/data/GBRASNET/BOSSbase-1.01-div/cover/train"
     )
     parser.add_argument(
         "--stego_path",
-        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
-        # default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
+        # default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
+        default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
     )
     parser.add_argument(
         "--valid_cover_path",
-        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/val"
-        # default="~/data/GBRASNET/BOSSbase-1.01-div/cover/val"
+        # default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/val"
+        default="~/data/GBRASNET/BOSSbase-1.01-div/cover/val"
     )
     parser.add_argument(
         "--valid_stego_path",
-        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
-        # default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
+        # default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
+        default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
     )
     parser.add_argument("--checkpoints_dir", default="./checkpoints/")
     parser.add_argument("--batch_size", type=int, default=10)
