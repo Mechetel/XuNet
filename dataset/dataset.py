@@ -1,68 +1,47 @@
-"""This module provide the data sample for training."""
+"""This module provides the data samples for training/validation."""
 
 import os
 from typing import Tuple
 import torch
 from torch import Tensor
 from torch.utils.data import Dataset
-
 import imageio as io
 
-from opts.options import arguments
-
-opt = arguments()
-# pylint: disable=E1101
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# pylint: enable=E1101
-
-
 class DatasetLoad(Dataset):
-    """This class returns the data samples."""
+    """Dataset for loading cover/stego pairs."""
 
-    def __init__(
-        self,
-        cover_path: str,
-        stego_path: str,
-        size: int,
-        transform: Tuple = None,
-    ) -> None:
-        """Constructor.
-
-        Args:
-            cover_path (str): path to cover images.
-            stego_path (str): path to stego images.
-            size (int): no. of images in any of (cover / stego) directory for
-              training.
-            transform (Tuple, optional): _description_. Defaults to None.
-        """
+    def __init__(self, cover_path, stego_path, mode, transform=None):
         self.cover = cover_path
         self.stego = stego_path
         self.transforms = transform
-        self.data_size = size
 
-    def __len__(self) -> int:
-        """returns the length of the dataset."""
-        return self.data_size
+        if mode == "train":
+            self.indices = list(range(1, 8001))      # 8000 images
+        elif mode == "val":
+            self.indices = list(range(8001, 10001))  # 2000 images
+        else:
+            raise ValueError("mode must be 'train' or 'val'")
 
-    def __getitem__(self, index: int) -> Tuple[Tensor, Tensor]:
-        """Returns the (cover, stego) pairs for training.
+        # labels (fixed)
+        self.label_cover = torch.tensor([0], dtype=torch.long)
+        self.label_stego = torch.tensor([1], dtype=torch.long)
 
-        Args:
-            index (int): a random int value in range (0, len(dataset)).
-        Returns:
-            Tuple[Tensor, Tensor]: cover and stego pair.
-        """
-        index += 1
-        img_name = str(index) + ".pgm"
+    def __len__(self):
+        return len(self.indices)
+
+    def __getitem__(self, idx):
+        index = self.indices[idx]
+        img_name = f"{index}.pgm"
+
         cover_img = io.imread(os.path.join(self.cover, img_name))
         stego_img = io.imread(os.path.join(self.stego, img_name))
-        # pylint: disable=E1101
-        label1 = torch.tensor(0, dtype=torch.long).to(device)
-        label2 = torch.tensor(1, dtype=torch.long).to(device)
-        # pylint: enable=E1101
+
         if self.transforms:
             cover_img = self.transforms(cover_img)
             stego_img = self.transforms(stego_img)
-            sample = {"cover": cover_img, "stego": stego_img}
-        sample["label"] = [label1, label2]
-        return sample
+
+        return {
+            "cover": cover_img,
+            "stego": stego_img,
+            "label": [self.label_cover, self.label_stego],
+        }

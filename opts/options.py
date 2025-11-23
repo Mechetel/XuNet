@@ -8,27 +8,27 @@ def arguments() -> str:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--cover_path",
-        default="D:\\Github\\Toy-Bossbase-dataset\\bossbase_toy_dataset\\train\\cover",
+        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/train"
+        # default="~/data/GBRASNET/BOSSbase-1.01-div/cover/train"
     )
     parser.add_argument(
         "--stego_path",
-        default="D:\\Github\\Toy-Bossbase-dataset\\bossbase_toy_dataset\\train\\stego",
+        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
+        # default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/train"
     )
     parser.add_argument(
         "--valid_cover_path",
-        default="D:\\Github\\Toy-Bossbase-dataset\\bossbase_toy_dataset\\valid\\cover",
+        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/val"
+        # default="~/data/GBRASNET/BOSSbase-1.01-div/cover/val"
     )
     parser.add_argument(
         "--valid_stego_path",
-        default=(
-            "D:\\Github\\Toy-Bossbase-dataset\\bossbase_toy_dataset\\valid\\stego"
-        ),
+        default="/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
+        # default="~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
     )
     parser.add_argument("--checkpoints_dir", default="./checkpoints/")
     parser.add_argument("--batch_size", type=int, default=10)
     parser.add_argument("--num_epochs", type=int, default=50)
-    parser.add_argument("--train_size", type=int, default=20)
-    parser.add_argument("--val_size", type=int, default=10)
     parser.add_argument("--lr", type=float, default=0.001)
 
     opt = parser.parse_args()

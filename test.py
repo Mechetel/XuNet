@@ -6,8 +6,10 @@ import imageio as io
 from model import XuNet
 
 TEST_BATCH_SIZE = 40
-COVER_PATH = "/path/to/cover/images/"
-STEGO_PATH = "/path/to/stego/images/"
+COVER_PATH = "/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/val"
+# COVER_PATH = "~/data/GBRASNET/BOSSbase-1.01-div/cover/val"
+STEGO_PATH = "/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
+# STEGO_PATH = "~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
 CHKPT = "./checkpoints/XuNet_model_weights.pt"
 
 cover_image_names = glob(COVER_PATH)
@@ -16,7 +18,9 @@ stego_image_names = glob(STEGO_PATH)
 cover_labels = np.zeros((len(cover_image_names)))
 stego_labels = np.ones((len(stego_image_names)))
 
-model = XuNet().cuda()
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+model = XuNet().to(device)
 
 ckpt = torch.load(CHKPT)
 model.load_state_dict(ckpt["model_state_dict"])
@@ -45,9 +49,9 @@ for idx in range(0, len(cover_image_names), TEST_BATCH_SIZE // 2):
             yi += 1
     # pylint: disable=E1101
     for i in range(TEST_BATCH_SIZE):
-        images[i, 0, :, :] = torch.tensor(io.imread(batch[i])).cuda()
-    image_tensor = images.cuda()
-    batch_labels = torch.tensor(batch_labels, dtype=torch.long).cuda()
+        images[i, 0, :, :] = torch.tensor(io.imread(batch[i])).to(device)
+    image_tensor = images.to(device)
+    batch_labels = torch.tensor(batch_labels, dtype=torch.long).to(device)
     # pylint: enable=E1101
     outputs = model(image_tensor)
     prediction = outputs.data.max(1)[1]

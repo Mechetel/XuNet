@@ -36,7 +36,7 @@ if __name__ == "__main__":
     train_data = dataset.DatasetLoad(
         opt.cover_path,
         opt.stego_path,
-        opt.train_size,
+        mode="train",
         transform=transforms.Compose(
             [
                 transforms.ToPILImage(),
@@ -49,9 +49,10 @@ if __name__ == "__main__":
     val_data = dataset.DatasetLoad(
         opt.valid_cover_path,
         opt.valid_stego_path,
-        opt.val_size,
+        mode="val",
         transform=transforms.ToTensor(),
     )
+
 
     # Creating training and validation loader.
     train_loader = DataLoader(
@@ -108,6 +109,7 @@ if __name__ == "__main__":
             labels = torch.cat(
                 (train_batch["label"][0], train_batch["label"][1]), 0
             )
+            labels = labels.view(-1).long()
             images = images.to(device, dtype=torch.float)
             labels = labels.to(device, dtype=torch.long)
             optimizer.zero_grad()
@@ -142,6 +144,7 @@ if __name__ == "__main__":
                 labels = torch.cat(
                     (val_batch["label"][0], val_batch["label"][1]), 0
                 )
+                labels = labels.view(-1).long()
 
                 images = images.to(device, dtype=torch.float)
                 labels = labels.to(device, dtype=torch.long)
