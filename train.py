@@ -1,4 +1,4 @@
-"""This module is use to train the XuNet model."""
+"""This module is used to train the XuNet model."""
 
 import logging
 import os
@@ -53,7 +53,6 @@ if __name__ == "__main__":
         transform=transforms.ToTensor(),
     )
 
-
     # Creating training and validation loader.
     train_loader = DataLoader(
         train_data, batch_size=opt.batch_size, shuffle=True
@@ -85,7 +84,7 @@ if __name__ == "__main__":
         print("No checkpoints found!!, Retraining started... ")
     else:
         pth = opt.checkpoints_dir + "net_" + str(check_point) + ".pt"
-        ckpt = torch.load(pth, map_location=device)
+        ckpt = torch.load(pth)
         START_EPOCH = ckpt["epoch"] + 1
         model.load_state_dict(ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
@@ -97,7 +96,6 @@ if __name__ == "__main__":
         training_accuracy = []
         validation_loss = []
         validation_accuracy = []
-        test_accuracy = []
 
         # Training
         model.train()
@@ -107,10 +105,10 @@ if __name__ == "__main__":
         for i, train_batch in enumerate(train_loader):
             batch_size = train_batch["cover"].size(0)
 
-            # Concatenate images
+            # Concatenate cover and stego images
             images = torch.cat((train_batch["cover"], train_batch["stego"]), 0)
 
-            # Create proper labels
+            # Create labels: 0 for cover, 1 for stego
             labels = torch.cat([
                 torch.zeros(batch_size, dtype=torch.long),
                 torch.ones(batch_size, dtype=torch.long)
@@ -124,7 +122,7 @@ if __name__ == "__main__":
             loss = loss_fn(outputs, labels)
             loss.backward()
 
-            # Gradient clipping
+            # Gradient clipping to prevent exploding gradients
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
             optimizer.step()
@@ -140,20 +138,26 @@ if __name__ == "__main__":
                 f" Batch:{i+1}/{len(train_loader)}"
                 f" Loss:{training_loss[-1]:.4f}"
                 f" Acc:{training_accuracy[-1]:.2f}"
-                f" LR:{optimizer.param_groups[0]['lr']:.4f}"
+                f" LR:{optimizer.param_groups[0]['lr']:.6f}"
             )
+            sys.stdout.flush()
 
         end_time = time.time()
 
         # Validation
         model.eval()
         with torch.no_grad():
-
             for i, val_batch in enumerate(valid_loader):
+                batch_size = val_batch["cover"].size(0)
+
+                # Concatenate cover and stego images
                 images = torch.cat((val_batch["cover"], val_batch["stego"]), 0)
-                labels = torch.cat(
-                    (val_batch["label"][0], val_batch["label"][1]), 0
-                )
+
+                # Create labels: 0 for cover, 1 for stego
+                labels = torch.cat([
+                    torch.zeros(batch_size, dtype=torch.long),
+                    torch.ones(batch_size, dtype=torch.long)
+                ])
 
                 images = images.to(device, dtype=torch.float)
                 labels = labels.to(device, dtype=torch.long)
@@ -172,15 +176,15 @@ if __name__ == "__main__":
 
         avg_train_loss = sum(training_loss) / len(training_loss)
         avg_valid_loss = sum(validation_loss) / len(validation_loss)
+        avg_train_acc = sum(training_accuracy) / len(training_accuracy)
+        avg_valid_acc = sum(validation_accuracy) / len(validation_accuracy)
 
         message = (
             f"Epoch: {epoch}. "
-            f"Train Loss:{(sum(training_loss) / len(training_loss)):.5f}. "
-            f"Valid Loss:{(sum(validation_loss) / len(validation_loss)):.5f}. "
-            "Train"
-            f" Acc:{(sum(training_accuracy) / len(training_accuracy)):.2f} "
-            "Valid"
-            f" Acc:{(sum(validation_accuracy) / len(validation_accuracy)):.2f} "
+            f"Train Loss:{avg_train_loss:.5f}. "
+            f"Valid Loss:{avg_valid_loss:.5f}. "
+            f"Train Acc:{avg_train_acc:.2f} "
+            f"Valid Acc:{avg_valid_acc:.2f} "
         )
         print("\n", message)
 
@@ -189,11 +193,10 @@ if __name__ == "__main__":
         state = {
             "epoch": epoch,
             "opt": opt,
-            "train_loss": sum(training_loss) / len(training_loss),
-            "valid_loss": sum(validation_loss) / len(validation_loss),
-            "train_accuracy": sum(training_accuracy) / len(training_accuracy),
-            "valid_accuracy": sum(validation_accuracy)
-            / len(validation_accuracy),
+            "train_loss": avg_train_loss,
+            "valid_loss": avg_valid_loss,
+            "train_accuracy": avg_train_acc,
+            "valid_accuracy": avg_valid_acc,
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "lr": optimizer.param_groups[0]["lr"],

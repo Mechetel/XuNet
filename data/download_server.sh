@@ -9,5 +9,5 @@ rm ~/data/GBRASNET.zip
 
 cp -r ~/data/GBRASNET/BOSSbase-1.01 ~/data/GBRASNET/BOSSbase-1.01-div
 
-git clone git@github.com:Mechetel/XuNet.git
+git clone https://github.com/Mechetel/XuNet.git
 bash ~/XuNet/data/split_server.sh
