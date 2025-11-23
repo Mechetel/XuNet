@@ -9,28 +9,18 @@ import torch.nn.functional as F
 
 class ImageProcessing(nn.Module):
     """Computes convolution with KV filter over the input tensor."""
-
     def __init__(self) -> None:
-        """Constructor"""
-
         super().__init__()
-        # pylint: disable=E1101
-        self.kv_filter = (
-            torch.tensor(
-                [
-                    [-1.0, 2.0, -2.0, 2.0, -1.0],
-                    [2.0, -6.0, 8.0, -6.0, 2.0],
-                    [-2.0, 8.0, -12.0, 8.0, -2.0],
-                    [2.0, -6.0, 8.0, -6.0, 2.0],
-                    [-1.0, 2.0, -2.0, 2.0, -1.0],
-                ],
-            ).view(1, 1, 5, 5)
-            / 12.0
-        )  # pylint: enable=E1101
+        kv = torch.tensor([
+            [-1.0, 2.0, -2.0, 2.0, -1.0],
+            [2.0, -6.0, 8.0, -6.0, 2.0],
+            [-2.0, 8.0, -12.0, 8.0, -2.0],
+            [2.0, -6.0, 8.0, -6.0, 2.0],
+            [-1.0, 2.0, -2.0, 2.0, -1.0],
+        ]).view(1, 1, 5, 5) / 12.0
+        self.register_buffer('kv_filter', kv)
 
     def forward(self, inp: Tensor) -> Tensor:
-        """Returns tensor convolved with KV filter"""
-
         return F.conv2d(inp, self.kv_filter, stride=1, padding=2)
 
 
@@ -79,13 +69,11 @@ class ConvBlock(nn.Module):
 
 
 class XuNet(nn.Module):
-    """This class returns XuNet model."""
-
+    """XuNet model for steganalysis."""
     def __init__(self) -> None:
         super().__init__()
-        self.layer1 = ConvBlock(
-            1, 8, kernel_size=5, activation="tanh", abs=True
-        )
+        self.preprocessing = ImageProcessing()
+        self.layer1 = ConvBlock(1, 8, kernel_size=5, activation="tanh", abs=True)
         self.layer2 = ConvBlock(8, 16, kernel_size=5, activation="tanh")
         self.layer3 = ConvBlock(16, 32, kernel_size=1)
         self.layer4 = ConvBlock(32, 64, kernel_size=1)
@@ -94,14 +82,14 @@ class XuNet(nn.Module):
         self.fully_connected = nn.Sequential(
             nn.Linear(in_features=128, out_features=128),
             nn.ReLU(inplace=True),
+            nn.Dropout(0.5),  # Add dropout
             nn.Linear(in_features=128, out_features=2),
             nn.LogSoftmax(dim=1),
         )
 
     def forward(self, image: Tensor) -> Tensor:
-        """Returns logit for the given tensor."""
-        with torch.no_grad():
-            out = ImageProcessing()(image)
+        # Allow gradients through preprocessing
+        out = self.preprocessing(image)
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)

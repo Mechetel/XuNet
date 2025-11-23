@@ -85,7 +85,7 @@ if __name__ == "__main__":
         print("No checkpoints found!!, Retraining started... ")
     else:
         pth = opt.checkpoints_dir + "net_" + str(check_point) + ".pt"
-        ckpt = torch.load(pth)
+        ckpt = torch.load(pth, map_location=device)
         START_EPOCH = ckpt["epoch"] + 1
         model.load_state_dict(ckpt["model_state_dict"])
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
@@ -105,16 +105,27 @@ if __name__ == "__main__":
         adjust_learning_rate(optimizer, epoch)
 
         for i, train_batch in enumerate(train_loader):
+            batch_size = train_batch["cover"].size(0)
+
+            # Concatenate images
             images = torch.cat((train_batch["cover"], train_batch["stego"]), 0)
-            labels = torch.cat(
-                (train_batch["label"][0], train_batch["label"][1]), 0
-            )
+
+            # Create proper labels
+            labels = torch.cat([
+                torch.zeros(batch_size, dtype=torch.long),
+                torch.ones(batch_size, dtype=torch.long)
+            ])
+
             images = images.to(device, dtype=torch.float)
             labels = labels.to(device, dtype=torch.long)
+
             optimizer.zero_grad()
             outputs = model(images)
             loss = loss_fn(outputs, labels)
             loss.backward()
+
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
 
             optimizer.step()
             training_loss.append(loss.item())

@@ -10,24 +10,17 @@ import imageio as io
 
 class DatasetLoad(Dataset):
     """Dataset for loading cover/stego pairs."""
-
     def __init__(self, cover_path, stego_path, mode, transform=None):
         self.cover = cover_path
         self.stego = stego_path
         self.transforms = transform
 
         if mode == "train":
-            self.indices = list(range(1, 8001))      # 8000 images
+            self.indices = list(range(1, 8001))
         elif mode == "val":
-            self.indices = list(range(8001, 10001))  # 2000 images
+            self.indices = list(range(8001, 10001))
         else:
             raise ValueError("mode must be 'train' or 'val'")
-
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # labels (fixed)
-        self.label_cover = torch.tensor(0, dtype=torch.long).to(device)
-        self.label_stego = torch.tensor(1, dtype=torch.long).to(device)
-
 
     def __len__(self):
         return len(self.indices)
@@ -39,6 +32,10 @@ class DatasetLoad(Dataset):
         cover_img = io.imread(os.path.join(self.cover, img_name))
         stego_img = io.imread(os.path.join(self.stego, img_name))
 
+        # Normalize to [0, 1]
+        cover_img = cover_img.astype('float32') / 255.0
+        stego_img = stego_img.astype('float32') / 255.0
+
         if self.transforms:
             cover_img = self.transforms(cover_img)
             stego_img = self.transforms(stego_img)
@@ -46,5 +43,4 @@ class DatasetLoad(Dataset):
         return {
             "cover": cover_img,
             "stego": stego_img,
-            "label": [self.label_cover, self.label_stego],
         }
