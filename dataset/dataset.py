@@ -7,6 +7,7 @@ from torch import Tensor
 from torch.utils.data import Dataset
 import imageio as io
 
+
 class DatasetLoad(Dataset):
     """Dataset for loading cover/stego pairs."""
 
@@ -22,9 +23,11 @@ class DatasetLoad(Dataset):
         else:
             raise ValueError("mode must be 'train' or 'val'")
 
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         # labels (fixed)
-        self.label_cover = torch.tensor([0], dtype=torch.long)
-        self.label_stego = torch.tensor([1], dtype=torch.long)
+        self.label_cover = torch.tensor(0, dtype=torch.long).to(device)
+        self.label_stego = torch.tensor(1, dtype=torch.long).to(device)
+
 
     def __len__(self):
         return len(self.indices)

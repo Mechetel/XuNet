@@ -109,7 +109,6 @@ if __name__ == "__main__":
             labels = torch.cat(
                 (train_batch["label"][0], train_batch["label"][1]), 0
             )
-            labels = labels.view(-1).long()
             images = images.to(device, dtype=torch.float)
             labels = labels.to(device, dtype=torch.long)
             optimizer.zero_grad()
@@ -144,7 +143,6 @@ if __name__ == "__main__":
                 labels = torch.cat(
                     (val_batch["label"][0], val_batch["label"][1]), 0
                 )
-                labels = labels.view(-1).long()
 
                 images = images.to(device, dtype=torch.float)
                 labels = labels.to(device, dtype=torch.long)
