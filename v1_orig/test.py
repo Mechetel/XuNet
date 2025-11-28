@@ -3,14 +3,14 @@ from glob import glob
 import torch
 import numpy as np
 import imageio as io
-from model import XuNet
+from model.model import XuNet
 
 TEST_BATCH_SIZE = 40
 COVER_PATH = "/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/cover/val"
 # COVER_PATH = "~/data/GBRASNET/BOSSbase-1.01-div/cover/val"
 STEGO_PATH = "/Users/dmitryhoma/Projects/phd_dissertation/state_3/INATNet/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
 # STEGO_PATH = "~/data/GBRASNET/BOSSbase-1.01-div/stego/S-UNIWARD/0.4bpp/stego/val"
-CHKPT = "./checkpoints/XuNet_model_weights.pt"
+CHKPT = "./checkpoints/net_50.pt"
 
 cover_image_names = glob(COVER_PATH)
 stego_image_names = glob(STEGO_PATH)
@@ -22,7 +22,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model = XuNet().to(device)
 
-ckpt = torch.load(CHKPT)
+ckpt = torch.load(CHKPT, map_location=device)
 model.load_state_dict(ckpt["model_state_dict"])
 # pylint: disable=E1101
 images = torch.empty((TEST_BATCH_SIZE, 1, 256, 256), dtype=torch.float)
