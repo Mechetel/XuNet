@@ -1,0 +1,39 @@
+======================================================================
+STEGANALYSIS TEST RESULTS
+======================================================================
+
+Timestamp: 2025-11-28 18:26:16
+Model: ./checkpoints/final_model.pth
+Cover path: /Users/dmitryhoma/Projects/datasets/ready_to_use/GBRASNET/BOSSbase-1.01/cover/test
+Stego path: /Users/dmitryhoma/Projects/datasets/ready_to_use/GBRASNET/BOSSbase-1.01/stego/S-UNIWARD/0.4bpp/test
+
+Test Loss: 1.338642
+
+Overall Metrics:
+  Accuracy:   0.5315 (53.15%)
+  Precision:  0.8706
+  Recall:     0.0740
+  F1 Score:   0.1364
+  AUC:        0.6726
+  Avg Precision: 0.6404
+
+Per-Class Metrics:
+  Cover Images:
+    Precision: 0.5164
+    Recall:    0.9890
+    F1 Score:  0.6786
+
+  Stego Images:
+    Precision: 0.8706
+    Recall:    0.0740
+    F1 Score:  0.1364
+
+Optimal Threshold: 0.0049
+Accuracy at optimal threshold: 0.6525
+
+Confusion Matrix:
+                Predicted Cover    Predicted Stego
+True Cover                  989                 11
+True Stego                  926                 74
+
+======================================================================

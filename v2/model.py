@@ -106,3 +106,21 @@ if __name__ == "__main__":
     print(net)
     inp_image = torch.randn((1, 1, 512, 512))
     print(net(inp_image))
+
+if __name__ == "__main__":
+    # Test the ZhuNet model with a random input
+    model = XuNet()
+    model.eval()
+    # get time to run one forward pass
+    input_tensor = torch.randn(1, 1, 256, 256)  # Example input tensor
+    output = model(input_tensor)
+    print("Output shape:", output.shape)  # Should be [1, num_classes]
+    print("Model architecture:\n", model)
+    import time
+    start_time = time.time()
+    output = model(input_tensor)
+    end_time = time.time()
+    print("Time for one forward pass: {:.6f} seconds".format(end_time - start_time))
+    # Print model parameters count
+    total_params = sum(p.numel() for p in model.parameters())
+    print("Total model parameters:", total_params)

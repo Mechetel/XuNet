@@ -173,10 +173,9 @@ def test_model(args):
     )
 
     # Save results
-    save_test_results(
-        args, test_loss, metrics, cm, roc_auc, avg_precision,
-        optimal_threshold, metrics_optimal, all_labels, all_preds, all_probs
-    )
+    save_test_results(args, test_loss, metrics, cm, roc_auc, avg_precision,
+                     optimal_threshold, metrics_optimal, all_labels, all_preds, all_probs,
+                     fpr, tpr, roc_thresholds, precision_curve, recall_curve, pr_thresholds)
 
     return {
         'test_loss': test_loss,
@@ -312,8 +311,9 @@ def create_test_visualizations(all_labels, all_preds, all_probs, cm,
 
 
 def save_test_results(args, test_loss, metrics, cm, roc_auc, avg_precision,
-                     optimal_threshold, metrics_optimal, all_labels, all_preds, all_probs):
-    """Save test results to files."""
+                     optimal_threshold, metrics_optimal, all_labels, all_preds, all_probs,
+                     fpr, tpr, roc_thresholds, precision_curve, recall_curve, pr_thresholds):
+    """Save test results to files including ROC and PR curve data."""
 
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -330,6 +330,21 @@ def save_test_results(args, test_loss, metrics, cm, roc_auc, avg_precision,
         'average_precision': float(avg_precision),
         'optimal_threshold': float(optimal_threshold),
         'metrics_at_optimal_threshold': {k: float(v) for k, v in metrics_optimal.items()},
+        'roc_curve': {
+            'fpr': fpr.tolist(),
+            'tpr': tpr.tolist(),
+            'thresholds': roc_thresholds.tolist()
+        },
+        'precision_recall_curve': {
+            'precision': precision_curve.tolist(),
+            'recall': recall_curve.tolist(),
+            'thresholds': pr_thresholds.tolist()
+        },
+        'predictions': {
+            'labels': all_labels.tolist(),
+            'predictions': all_preds.tolist(),
+            'probabilities': all_probs.tolist()
+        }
     }
 
     json_path = os.path.join(args.output_dir, 'test_results.json')
@@ -377,6 +392,7 @@ def save_test_results(args, test_loss, metrics, cm, roc_auc, avg_precision,
         f.write("\n" + "="*70 + "\n")
 
     print(f"✓ Results saved to '{txt_path}' and '{json_path}'")
+    print(f"✓ JSON includes ROC curve, PR curve, and all prediction data for recreating plots")
 
 
 if __name__ == '__main__':
